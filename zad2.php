@@ -1,5 +1,5 @@
 <?
-$_SERVER["DOCUMENT_ROOT"] = "/home/hosting/www"; //это можно и убрать на некоторых серверах работает
+$_SERVER["DOCUMENT_ROOT"] = "/home/hosting/www"; //СЌС‚Рѕ РјРѕР¶РЅРѕ Рё СѓР±СЂР°С‚СЊ РЅР° РЅРµРєРѕС‚РѕСЂС‹С… СЃРµСЂРІРµСЂР°С… СЂР°Р±РѕС‚Р°РµС‚
 $DOCUMENT_ROOT = $_SERVER["DOCUMENT_ROOT"];
 
 define("NO_KEEP_STATISTIC", true);
@@ -9,11 +9,11 @@ require($_SERVER["DOCUMENT_ROOT"] . "/bitrix/modules/main/include/prolog_before.
 set_time_limit(0);
 CModule::IncludeModule("sale");
 
-//функция получения вишлиста
+//С„СѓРЅРєС†РёСЏ РїРѕР»СѓС‡РµРЅРёСЏ РІРёС€Р»РёСЃС‚Р°
 
 function getUserDelay($userId)
 {
-    // Получаем список корзины
+    // РџРѕР»СѓС‡Р°РµРј СЃРїРёСЃРѕРє РєРѕСЂР·РёРЅС‹
     $arBasketItems = array();
     $dbBasketItems = CSaleBasket::GetList(
         array(
@@ -44,19 +44,19 @@ function getUserDelay($userId)
         $arBasketItems[] = $arItems;
     }
 
-    // Печатаем массив, содержащий актуальную на текущий момент корзину
+    // РџРµС‡Р°С‚Р°РµРј РјР°СЃСЃРёРІ, СЃРѕРґРµСЂР¶Р°С‰РёР№ Р°РєС‚СѓР°Р»СЊРЅСѓСЋ РЅР° С‚РµРєСѓС‰РёР№ РјРѕРјРµРЅС‚ РєРѕСЂР·РёРЅСѓ
 
 
     $whishlist = "";
     foreach ($arBasketItems as $delay) {
-        $notBuy = "Y"; // флаг для проверки покупался ли данный товар,
+        $notBuy = "Y"; // С„Р»Р°Рі РґР»СЏ РїСЂРѕРІРµСЂРєРё РїРѕРєСѓРїР°Р»СЃСЏ Р»Рё РґР°РЅРЅС‹Р№ С‚РѕРІР°СЂ,
         $difference = floor(intval(abs(time() - strtotime($delay[DATE_INSERT]))) / (3600 * 24));
-        // перебираем отложенные элементы, срок которых менее 30 дней
+        // РїРµСЂРµР±РёСЂР°РµРј РѕС‚Р»РѕР¶РµРЅРЅС‹Рµ СЌР»РµРјРµРЅС‚С‹, СЃСЂРѕРє РєРѕС‚РѕСЂС‹С… РјРµРЅРµРµ 30 РґРЅРµР№
         if ($delay["DELAY"] == "Y" && $difference < 30) {
             foreach ($arBasketItems as $notDelay) {
-                //перебираем купленные элементы и сравниваем с отложенными
+                //РїРµСЂРµР±РёСЂР°РµРј РєСѓРїР»РµРЅРЅС‹Рµ СЌР»РµРјРµРЅС‚С‹ Рё СЃСЂР°РІРЅРёРІР°РµРј СЃ РѕС‚Р»РѕР¶РµРЅРЅС‹РјРё
                 if ($notDelay["DELAY"] != "Y" && $delay[PRODUCT_ID] == $notDelay[PRODUCT_ID] && $difference < 30) {
-                    $notBuy = "N";  // товар уже покупался
+                    $notBuy = "N";  // С‚РѕРІР°СЂ СѓР¶Рµ РїРѕРєСѓРїР°Р»СЃСЏ
                 }
             }
             if ($notBuy == "Y") {
@@ -83,22 +83,22 @@ $dbUserBasketItems = CSaleBasket::GetList(
     false,
     array("FUSER_ID")
 );
-//получаем всех пользователей у которых есть отложенные товары
+//РїРѕР»СѓС‡Р°РµРј РІСЃРµС… РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№ Сѓ РєРѕС‚РѕСЂС‹С… РµСЃС‚СЊ РѕС‚Р»РѕР¶РµРЅРЅС‹Рµ С‚РѕРІР°СЂС‹
 while ($rr = $dbUserBasketItems->fetch()) {
 
     if ($ar = CSaleOrderUserProps::GetByID($rr['FUSER_ID'])) {
-        $name = $ar['NAME']; //берем имя пользователя из профиля
+        $name = $ar['NAME']; //Р±РµСЂРµРј РёРјСЏ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ РёР· РїСЂРѕС„РёР»СЏ
 
 
         $wishlist = getUserDelay($rr['FUSER_ID']);
         if ($wishlist) {
-//отправляем письмо
+//РѕС‚РїСЂР°РІР»СЏРµРј РїРёСЃСЊРјРѕ
             $arEventFields = array(
                 "WISHLIST" => $wishlist,
                 "USER" => $name,
 
             );
-            CEvent::SendImmediate("SALE_NEW_ORDER", s1, $arEventFields, "N", 22); // конечно шаблон и тип шаблона можно вынести в настройки например модуля
+            CEvent::SendImmediate("SALE_NEW_ORDER", s1, $arEventFields, "N", 22); // РєРѕРЅРµС‡РЅРѕ С€Р°Р±Р»РѕРЅ Рё С‚РёРї С€Р°Р±Р»РѕРЅР° РјРѕР¶РЅРѕ РІС‹РЅРµСЃС‚Рё РІ РЅР°СЃС‚СЂРѕР№РєРё РЅР°РїСЂРёРјРµСЂ РјРѕРґСѓР»СЏ
             /*---------------*/
         }
     }
